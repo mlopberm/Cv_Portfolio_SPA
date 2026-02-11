@@ -65,11 +65,42 @@ export default function Home() {
     return `director-${activeAgent}`;
   }, [activeAgent]);
 
+  const graphNodes = useMemo(
+    () => [
+      { id: "director", x: 43, y: 10, label: "🎩 Director", subtitle: "Coordinador principal" },
+      { id: "conserje", x: 2, y: 45, label: "🧭 Conserje", subtitle: "Router de intención" },
+      { id: "arquitecto", x: 30, y: 45, label: "🧱 Arquitecto", subtitle: "Buscador de proyectos" },
+      { id: "historiador", x: 57, y: 45, label: "📜 Historiador", subtitle: "Experto de CV" },
+      { id: "sintetizador", x: 84, y: 45, label: "🎼 Sintetizador", subtitle: "Respuesta final" },
+      { id: "tooling", x: 43, y: 78, label: "🛢️ PostgreSQL / Tools", subtitle: "Context retrieval" },
+    ],
+    [],
+  );
+
+  const graphEdges = useMemo(
+    () => [
+      { from: "director", to: "conserje", key: "director-conserje", color: AGENTS.conserje.color },
+      { from: "director", to: "arquitecto", key: "director-arquitecto", color: AGENTS.arquitecto.color },
+      { from: "director", to: "historiador", key: "director-historiador", color: AGENTS.historiador.color },
+      {
+        from: "director",
+        to: "sintetizador",
+        key: "director-sintetizador",
+        color: AGENTS.sintetizador.color,
+      },
+      { from: "arquitecto", to: "tooling", key: "arquitecto-tooling", color: "#63ffe6", tool: true },
+      { from: "historiador", to: "tooling", key: "historiador-tooling", color: "#88a5e5", dashed: true },
+    ],
+    [],
+  );
+
+  const nodeMap = useMemo(
+    () => graphNodes.reduce((acc, node) => ({ ...acc, [node.id]: node }), {}),
+    [graphNodes],
+  );
+
   const logEvent = (title, details) => {
-    setFlowEvents((prev) => [
-      { id: `${Date.now()}-${Math.random()}`, title, details },
-      ...prev,
-    ]);
+    setFlowEvents((prev) => [{ id: `${Date.now()}-${Math.random()}`, title, details }, ...prev]);
   };
 
   const typeAssistantMessage = async (text) => {
@@ -206,12 +237,7 @@ export default function Home() {
 
             <div className={styles.quickPrompts}>
               {demoPrompts.map((prompt) => (
-                <button
-                  key={prompt}
-                  type="button"
-                  onClick={() => setQuery(prompt)}
-                  disabled={running}
-                >
+                <button key={prompt} type="button" onClick={() => setQuery(prompt)} disabled={running}>
                   {prompt}
                 </button>
               ))}
@@ -222,68 +248,59 @@ export default function Home() {
             <h2>Panel de agentes</h2>
             <p className={styles.phaseText}>{phaseText}</p>
 
-            <div className={styles.directorCard}>
-              <span className={styles.directorIcon}>🎩</span>
-              <div>
-                <strong>Director</strong>
-                <p>Coordina el flujo y compone la respuesta final.</p>
-              </div>
-            </div>
+            <div className={styles.graphCard}>
+              <svg viewBox="0 0 100 100" className={styles.graphLines} preserveAspectRatio="none">
+                <defs>
+                  <marker
+                    id="arrow"
+                    markerWidth="6"
+                    markerHeight="6"
+                    refX="5"
+                    refY="3"
+                    orient="auto"
+                    markerUnits="strokeWidth"
+                  >
+                    <path d="M0,0 L6,3 L0,6 z" fill="#9ab2ec" />
+                  </marker>
+                </defs>
+                {graphEdges.map((edge) => {
+                  const from = nodeMap[edge.from];
+                  const to = nodeMap[edge.to];
+                  const isActive = edge.tool ? activeTool : activePath === edge.key;
+                  return (
+                    <line
+                      key={edge.key}
+                      x1={from.x + 7}
+                      y1={from.y + 8}
+                      x2={to.x + 7}
+                      y2={to.y}
+                      className={`${styles.edgeLine} ${isActive ? styles.edgeLineActive : ""}`}
+                      style={{
+                        stroke: isActive ? edge.color : "rgba(125, 153, 226, 0.42)",
+                        strokeDasharray: edge.dashed ? "2 2" : "none",
+                        markerEnd: "url(#arrow)",
+                      }}
+                    />
+                  );
+                })}
+              </svg>
 
-            <div className={styles.pathContainer}>
-              <span
-                className={`${styles.path} ${
-                  activePath === "director-conserje" ? styles.pathActive : ""
-                }`}
-              />
-              <span
-                className={`${styles.path} ${
-                  activePath === "director-arquitecto" ? styles.pathActive : ""
-                }`}
-              />
-              <span
-                className={`${styles.path} ${
-                  activePath === "director-historiador" ? styles.pathActive : ""
-                }`}
-              />
-              <span
-                className={`${styles.path} ${
-                  activePath === "director-sintetizador" ? styles.pathActive : ""
-                }`}
-              />
-            </div>
-
-            <div className={styles.agentGrid}>
-              {Object.values(AGENTS).map((agent) => {
-                const isActive = activeAgent === agent.id;
+              {graphNodes.map((node) => {
+                const isActiveAgent = activeAgent === node.id;
+                const isTool = node.id === "tooling";
                 return (
                   <article
-                    key={agent.id}
-                    className={`${styles.agentCard} ${isActive ? styles.agentActive : ""}`}
-                    style={{ "--agent-color": agent.color }}
+                    key={node.id}
+                    className={`${styles.graphNode} ${
+                      isActiveAgent || (isTool && activeTool) ? styles.graphNodeActive : ""
+                    }`}
+                    style={{ left: `${node.x}%`, top: `${node.y}%` }}
                   >
-                    <div className={styles.agentHeader}>
-                      <span className={styles.agentIcon}>{agent.icon}</span>
-                      <div>
-                        <strong>{agent.title}</strong>
-                        <small>{agent.role}</small>
-                      </div>
-                    </div>
-                    <p>{agent.description}</p>
-                    <span className={styles.agentState}>
-                      {isActive ? "Ejecutando..." : "En espera"}
-                    </span>
+                    <strong>{node.label}</strong>
+                    <small>{node.subtitle}</small>
                   </article>
                 );
               })}
-            </div>
-
-            <div className={`${styles.toolCard} ${activeTool ? styles.toolActive : ""}`}>
-              <span>🛢️</span>
-              <div>
-                <strong>PostgreSQL / Tools</strong>
-                <p>{activeTool ? "Consultando contexto de proyectos..." : "Sin actividad"}</p>
-              </div>
             </div>
 
             <div className={styles.eventsPanel}>

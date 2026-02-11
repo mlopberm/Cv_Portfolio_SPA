@@ -153,110 +153,54 @@
   color: #9fdfff;
 }
 
-.directorCard,
-.toolCard {
-  border-radius: 14px;
+.graphCard {
+  border-radius: 16px;
   border: 1px solid rgba(129, 168, 255, 0.4);
-  padding: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  background: rgba(27, 40, 78, 0.8);
+  background: radial-gradient(circle at top, rgba(37, 58, 114, 0.45), rgba(8, 16, 36, 0.95));
+  overflow: hidden;
+  height: 500px;
+  position: relative;
 }
 
-.directorIcon {
-  font-size: 1.8rem;
+.graphLines {
+  width: 100%;
+  height: 100%;
 }
 
-.directorCard p,
-.toolCard p {
-  margin: 0.15rem 0 0;
-  color: #b8c8ef;
-  font-size: 0.88rem;
+.edgeLine {
+  stroke-width: 0.45;
+  transition: 180ms ease;
 }
 
-.pathContainer {
-  margin: 0.8rem 0;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+.edgeLineActive {
+  stroke-width: 0.72;
+  filter: drop-shadow(0 0 6px rgba(117, 233, 255, 0.55));
 }
 
-.path {
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(117, 153, 255, 0.25);
+.graphNode {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  border-radius: 12px;
+  border: 1px solid rgba(129, 168, 255, 0.4);
+  background: rgba(13, 27, 62, 0.95);
+  padding: 0.45rem 0.55rem;
+  box-shadow: 0 10px 20px rgba(3, 8, 22, 0.5);
 }
 
-.pathActive {
-  background: linear-gradient(90deg, #34ddff, #84ffb4);
-  box-shadow: 0 0 18px rgba(82, 220, 255, 0.9);
-}
-
-.agentGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.7rem;
-}
-
-.agentCard {
-  border-radius: 15px;
-  border: 1px solid rgba(126, 149, 211, 0.35);
-  background: rgba(13, 24, 54, 0.8);
-  padding: 0.7rem;
-  min-height: 140px;
-  transition: 220ms ease;
-}
-
-.agentActive {
-  border-color: var(--agent-color);
-  box-shadow: 0 0 0 1px var(--agent-color), 0 0 25px color-mix(in srgb, var(--agent-color), transparent 65%);
-  transform: translateY(-2px);
-}
-
-.agentHeader {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.agentIcon {
-  width: 2rem;
-  height: 2rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.agentHeader small {
+.graphNode strong {
   display: block;
-  color: #9fb4e7;
+  font-size: 0.72rem;
 }
 
-.agentCard p {
-  margin: 0.5rem 0;
-  color: #c4d4f9;
-  font-size: 0.86rem;
+.graphNode small {
+  color: #9cb5ea;
+  font-size: 0.66rem;
 }
 
-.agentState {
-  font-size: 0.78rem;
-  color: #97acdf;
-}
-
-.toolCard {
-  margin-top: 0.8rem;
-}
-
-.toolCard span {
-  font-size: 1.4rem;
-}
-
-.toolActive {
-  border-color: #63ffe6;
-  box-shadow: 0 0 20px rgba(99, 255, 230, 0.5);
+.graphNodeActive {
+  border-color: #7ce8ff;
+  box-shadow: 0 0 0 1px rgba(124, 232, 255, 0.65), 0 0 20px rgba(124, 232, 255, 0.35);
 }
 
 .eventsPanel {
@@ -304,6 +248,10 @@
   .messages {
     height: 340px;
   }
+
+  .graphCard {
+    height: 430px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -311,7 +259,7 @@
     padding: 1rem;
   }
 
-  .agentGrid {
-    grid-template-columns: 1fr;
+  .graphCard {
+    height: 360px;
   }
 }
