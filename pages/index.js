@@ -65,6 +65,26 @@ export default function Home() {
     return `director-${activeAgent}`;
   }, [activeAgent]);
 
+  const graphNodes = useMemo(
+    () => [
+      { id: "director", x: 50, y: 14, label: "Director", icon: "🎩", tone: "#67d9ff" },
+      { id: "conserje", x: 20, y: 42, ...AGENTS.conserje },
+      { id: "arquitecto", x: 78, y: 42, ...AGENTS.arquitecto },
+      { id: "historiador", x: 20, y: 78, ...AGENTS.historiador },
+      { id: "sintetizador", x: 78, y: 78, ...AGENTS.sintetizador },
+      {
+        id: "tools",
+        x: 50,
+        y: 60,
+        label: "Tools",
+        icon: "🛢️",
+        role: "PostgreSQL",
+        tone: "#63ffe6",
+      },
+    ],
+    [],
+  );
+
   const logEvent = (title, details) => {
     setFlowEvents((prev) => [
       { id: `${Date.now()}-${Math.random()}`, title, details },
@@ -230,61 +250,86 @@ export default function Home() {
               </div>
             </div>
 
-            <div className={styles.pathContainer}>
-              <span
-                className={`${styles.path} ${
-                  activePath === "director-conserje" ? styles.pathActive : ""
-                }`}
-              />
-              <span
-                className={`${styles.path} ${
-                  activePath === "director-arquitecto" ? styles.pathActive : ""
-                }`}
-              />
-              <span
-                className={`${styles.path} ${
-                  activePath === "director-historiador" ? styles.pathActive : ""
-                }`}
-              />
-              <span
-                className={`${styles.path} ${
-                  activePath === "director-sintetizador" ? styles.pathActive : ""
-                }`}
-              />
-            </div>
+            <div className={styles.graphShell}>
+              <svg className={styles.graphLines} viewBox="0 0 100 100" preserveAspectRatio="none">
+                <line
+                  x1="50"
+                  y1="16"
+                  x2="20"
+                  y2="42"
+                  className={`${styles.graphLine} ${
+                    activePath === "director-conserje" ? styles.graphLineActive : ""
+                  }`}
+                />
+                <line
+                  x1="50"
+                  y1="16"
+                  x2="78"
+                  y2="42"
+                  className={`${styles.graphLine} ${
+                    activePath === "director-arquitecto" ? styles.graphLineActive : ""
+                  }`}
+                />
+                <line
+                  x1="50"
+                  y1="16"
+                  x2="20"
+                  y2="78"
+                  className={`${styles.graphLine} ${
+                    activePath === "director-historiador" ? styles.graphLineActive : ""
+                  }`}
+                />
+                <line
+                  x1="50"
+                  y1="16"
+                  x2="78"
+                  y2="78"
+                  className={`${styles.graphLine} ${
+                    activePath === "director-sintetizador" ? styles.graphLineActive : ""
+                  }`}
+                />
+                <line
+                  x1="50"
+                  y1="16"
+                  x2="50"
+                  y2="60"
+                  className={`${styles.graphLine} ${activeTool ? styles.graphLineToolActive : ""}`}
+                />
+              </svg>
 
-            <div className={styles.agentGrid}>
-              {Object.values(AGENTS).map((agent) => {
-                const isActive = activeAgent === agent.id;
+              {graphNodes.map((node) => {
+                const isAgent = Object.hasOwn(AGENTS, node.id);
+                const isActive = activeAgent === node.id;
+                const isToolNode = node.id === "tools";
                 return (
                   <article
-                    key={agent.id}
-                    className={`${styles.agentCard} ${isActive ? styles.agentActive : ""}`}
-                    style={{ "--agent-color": agent.color }}
+                    key={node.id}
+                    className={`${styles.nodeCard} ${
+                      isActive || (isToolNode && activeTool) ? styles.nodeActive : ""
+                    } ${isToolNode ? styles.toolNode : ""}`}
+                    style={{
+                      left: `${node.x}%`,
+                      top: `${node.y}%`,
+                      "--node-color": node.color || node.tone,
+                    }}
                   >
-                    <div className={styles.agentHeader}>
-                      <span className={styles.agentIcon}>{agent.icon}</span>
-                      <div>
-                        <strong>{agent.title}</strong>
-                        <small>{agent.role}</small>
-                      </div>
+                    <span className={styles.nodeIcon}>{node.icon}</span>
+                    <div>
+                      <strong>{node.title || node.label}</strong>
+                      <small>{node.role}</small>
                     </div>
-                    <p>{agent.description}</p>
-                    <span className={styles.agentState}>
-                      {isActive ? "Ejecutando..." : "En espera"}
-                    </span>
+                    {isAgent ? (
+                      <span className={styles.nodeState}>{isActive ? "Ejecutando" : "En espera"}</span>
+                    ) : null}
                   </article>
                 );
               })}
             </div>
 
-            <div className={`${styles.toolCard} ${activeTool ? styles.toolActive : ""}`}>
-              <span>🛢️</span>
-              <div>
-                <strong>PostgreSQL / Tools</strong>
-                <p>{activeTool ? "Consultando contexto de proyectos..." : "Sin actividad"}</p>
-              </div>
-            </div>
+            <p className={styles.graphLegend}>
+              Visualización estilo grafo: el Director enruta consultas y activa especialistas según la
+              intención detectada.
+            </p>
 
             <div className={styles.eventsPanel}>
               <h3>Eventos de ejecución</h3>
